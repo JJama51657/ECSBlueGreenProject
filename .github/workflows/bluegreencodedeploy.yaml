@@ -57,7 +57,6 @@ jobs:
 
   Security-Scan:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
     needs: Build
     steps:
       - name: Checkout repository

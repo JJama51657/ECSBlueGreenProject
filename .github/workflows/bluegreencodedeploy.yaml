@@ -19,7 +19,70 @@ permissions:
   contents: read
   id-token: write
 jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup
+        run: mvn install
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: target/*.war
+
+      - name: Failure detection
+        if: failure()
+        run: echo "Build failed!"
+        
+  Testing:
+    runs-on: ubuntu-latest
+    needs: Build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: testing
+        run: mvn test
+    
+      - name: Wrong branch detection
+        run: echo 'Wrong branch, testing has been skipped.'
+
+
+  Security-Scan:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    needs: Build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run trivy security scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-refs: .
+          format: json
+          exit-code: 0
+          vuln-type: os,library
+          output: trivy-report.json
+
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy Report
+          path: trivy-report.json
+
   Build-and-Publish:
+    needs: [Build, Testing, Security-Scan]
     runs-on: ubuntu-latest      
     steps:
       - name: Checkout repository

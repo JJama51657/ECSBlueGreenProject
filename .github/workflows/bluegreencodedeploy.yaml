@@ -1,0 +1,108 @@
+name: Build WF
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+env:                               # Update these environment variables with your specific values
+  AWS_REGION: us-east-1
+  ECR_REPO: myrepo
+  ECS_CLUSTER: my-app                  
+  ECS_SERVICE: my-service
+  TASK_FAMILY: myapp-taskfamily                       
+  CODEDEPLOY_APP: Sampleapp                      
+  CODEDEPLOY_GROUP: sampleapp-deploymentgroup
+  CODEDEPLOY_BUCKET: bucket
+
+
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  Build-and-Publish:
+    runs-on: ubuntu-latest      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<USE_ACCOUNT_NO.>:role/GitHubActionsECSRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3️⃣ Login to Amazon ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4️⃣ Build and push Docker image to ECR
+      - name: Build and push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f Docker-files/app/multistage/Dockerfile -t <USE_ACCOUNT_NO.>.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG .            
+          docker push \
+            <USE_ACCOUNT_NO.>.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+      # 5️⃣ Get current task definition
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition $TASK_FAMILY \
+            --query taskDefinition \
+            > taskdef.json
+
+      # 6️⃣ Create new task definition revision (update image only)
+      - name: Create new task definition
+        env:
+          IMAGE_URI: <USE_ACCOUNT_NO.>.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}
+        run: |
+          jq --arg IMAGE "$IMAGE_URI" '
+            .containerDefinitions[0].image = $IMAGE
+            | del(
+                .taskDefinitionArn,
+                .revision,
+                .status,
+                .requiresAttributes,
+                .compatibilities,
+                .registeredAt,
+                .registeredBy,
+                .enableFaultInjection
+              )
+          ' taskdef.json > new-taskdef.json
+          
+
+
+
+      # 7️⃣ Register new task definition revision
+      - name: Register task definition
+        id: register
+        run: |
+          cat new-taskdef.json
+          aws ecs register-task-definition \
+            --cli-input-json file://new-taskdef.json \
+            --query "taskDefinition.taskDefinitionArn" \
+            --output text > taskdef-arn.txt
+
+       # 🧩 Inject task definition ARN into AppSpec
+      - name: Prepare AppSpec
+        run: |
+          sed "s|{{TASK_DEFINITION}}|$(cat taskdef-arn.txt)|g" \
+            appspec.yaml > appspec-final.yaml
+          cat appspec-final.yaml
+        # 7️⃣ Upload AppSpec to S3 (REQUIRED for CodeDeploy)
+      - name: Upload AppSpec to S3
+        run: |
+          TIMESTAMP=${{ github.sha }}
+          aws s3 cp appspec-final.yaml s3://$CODEDEPLOY_BUCKET/appspec-${TIMESTAMP}.yaml
+          sleep 5
+
+      # 8️⃣ Trigger CodeDeploy Blue/Green deployment
+      - name: Deploy via CodeDeploy
+        run: |
+          TIMESTAMP=${{ github.sha }}
+          aws deploy create-deployment \
+            --application-name "$CODEDEPLOY_APP" \
+            --deployment-group-name "$CODEDEPLOY_GROUP" \
+            --revision "revisionType=S3,s3Location={bucket=$CODEDEPLOY_BUCKET,key=appspec-${TIMESTAMP}.yaml,bundleType=Yaml}"

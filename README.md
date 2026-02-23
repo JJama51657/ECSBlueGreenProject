@@ -60,13 +60,6 @@ CloudWatch Alarms monitor health and trigger rollbacks
 </ol>
 <blockquote>Note: All AWS account IDs, IAM ARNs, and S3 bucket names are replaced with placeholders for public repositories.</blockquote>
 
-<h2>Running Locally (Optional)</h2>
-<p>To run a development version locally:</p>
-<pre>
-docker-compose up
-</pre>
-<p>This spins up the application container and any dependent services. <strong>Production ECS deployments do not use Docker Compose.</strong></p>
-
 <h2>Key Learnings / Best Practices</h2>
 <ul>
   <li>Gradual traffic shifting and pre-traffic health checks prevent downtime.</li>

@@ -40,7 +40,7 @@ CloudWatch Alarms monitor health and trigger rollbacks
 ├── docker-files/             # Dockerfiles and container build scripts
 │   └── app/multistage/Dockerfile
 ├── .github/workflows/        # GitHub Actions CI/CD workflow
-│   └── build.yml
+│   └── bluegreencodedeploy.yml
 ├── appspec.yaml              # CodeDeploy deployment specification
 ├── README.md                 # Project documentation
 └── docker-compose.yml        # Optional local dev environment

@@ -79,6 +79,7 @@ CloudWatch Alarms monitor health and trigger rollbacks
   <li>CloudWatch + SNS</li>
   <li>GitHub Actions</li>
   <li>Docker (multi-stage builds)</li>
+  <li>SonarQube + Trivy Scan</li>
   <li>Bash / jq automation scripts</li>
 </ul>
 

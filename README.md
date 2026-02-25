@@ -15,7 +15,7 @@
 </ul>
 
 <h2>Architecture Overview</h2>
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/640fdd84-5944-4a59-a13d-22fa29d6c53b" />
+<img width="512" height="7518" alt="image" src="https://github.com/user-attachments/assets/640fdd84-5944-4a59-a13d-22fa29d6c53b" />
 
 
 <h2>Repository Structure</h2>

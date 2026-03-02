@@ -46,14 +46,73 @@
 </ol>
 <blockquote>Note: All AWS account IDs, IAM ARNs, and S3 bucket names are replaced with placeholders for public repositories.</blockquote>
 
+<section>
+  <h2>⚙ Key Configuration (appspec.yaml Excerpt)</h2>
+  <p>
+    The following excerpt from <code>appspec.yaml</code> shows how CodeDeploy integrates
+    with the ECS service and Application Load Balancer to enable blue/green deployments.
+    This configuration allows traffic shifting between task sets during deployment.
+  </p>
+
+  <pre><code>version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: &lt;TASK_DEFINITION&gt;
+        LoadBalancerInfo:
+          ContainerName: app
+          ContainerPort: 3000
+</code></pre>
+
+  <p>
+    This configuration links the ECS service to CodeDeploy and enables controlled
+    traffic shifting via the load balancer during blue/green deployments.
+  </p>
+</section>
+
+<section>
+  <h2>🔧 Failure Testing &amp; Operational Lessons</h2>
+
+  <h3>Issue: Deployment Failed After Stopping Midway</h3>
+  <p>
+    During testing, I manually stopped a blue/green deployment in the traffic-shifting phase.
+    When initiating a new deployment afterward, CodeDeploy failed to start the process.
+  </p>
+
+  <h3>Root Cause</h3>
+  <p>
+    Stopping the deployment left the Application Load Balancer target group weights in a
+    partially shifted state. CodeDeploy requires the original traffic baseline of:
+  </p>
+  <ul>
+    <li>100% traffic → Blue (original task set)</li>
+    <li>0% traffic → Green (replacement task set)</li>
+  </ul>
+  <p>
+    Because the weights were not reset automatically, the environment was left in an
+    inconsistent state, preventing the next deployment from proceeding.
+  </p>
+
+  <h3>Resolution</h3>
+  <ul>
+    <li>Inspected ALB listener rules and target group weights</li>
+    <li>Identified incorrect weighted routing configuration</li>
+    <li>Manually reset weights to 100% Blue / 0% Green</li>
+    <li>Triggered a new deployment successfully</li>
+  </ul>
+
 <h2>Key Learnings / Best Practices</h2>
 <ul>
+  <li>CodeDeploy assumes a known traffic baseline before starting blue/green.</li>
+  <li>Manually interrupting deployments can leave infrastructure in a partially transitioned state.</li>
   <li>Gradual traffic shifting and pre-traffic health checks prevent downtime.</li>
   <li>CloudWatch alarms provide early detection of deployment issues.</li>
   <li>Controlled failure testing ensures rollback procedures are effective.</li>
   <li>ECS task definition versioning enables immutable, auditable deployments.</li>
   <li>GitHub OIDC + IAM role assumption avoids hardcoding AWS credentials.</li>
 </ul>
+</section>
 
 <h2>Technologies Used</h2>
 <ul>

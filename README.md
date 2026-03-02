@@ -95,6 +95,7 @@ Resources:
   </p>
 
   <h3>Resolution</h3>
+  <hr>
   <ul>
     <li>Inspected ALB listener rules and target group weights</li>
     <li>Identified incorrect weighted routing configuration</li>

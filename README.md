@@ -94,8 +94,7 @@ Resources:
     inconsistent state, preventing the next deployment from proceeding.
   </p>
 
-  <h3>Resolution</h3>
-  <hr>
+  <h2>Resolution</h2>
   <ul>
     <li>Inspected ALB listener rules and target group weights</li>
     <li>Identified incorrect weighted routing configuration</li>

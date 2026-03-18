@@ -162,12 +162,28 @@ Stopping a deployment mid-traffic shift caused subsequent deployments to fail.
 
 <hr/>
 
-<h2>📸 Screenshots</h2>
+<h2>📸 Screenshots Of My Work</h2>
+
 <ul>
-  <li>GitHub Actions Pipeline</li>
-  <li>Blue/Green Deployment Traffic Shift</li>
-  <li>Rollback via CloudWatch</li>
-  <li>Multi-stage Docker Build</li>
+  <li>
+    <p><strong>GitHub Actions Workflow</strong></p>
+    <img width="630" height="245" src="https://github.com/user-attachments/assets/de053663-9ad9-4ce0-bcfb-a9eda56c342a" />
+  </li>
+
+  <li>
+    <p><strong>CodeDeploy Blue/Green Traffic Shift</strong></p>
+    <img width="744" height="311" src="https://github.com/user-attachments/assets/1ef441e0-701a-47ac-8300-37e976ed6189" />
+  </li>
+
+  <li>
+    <p><strong>Rollback via CloudWatch Alarms</strong></p>
+    <img width="584" height="425" src="https://github.com/user-attachments/assets/eb1fc54d-6932-48a4-9153-3d08072bb864" />
+  </li>
+
+  <li>
+    <p><strong>Multi-Stage Docker Build</strong></p>
+    <img width="1094" height="352" src="https://github.com/user-attachments/assets/08556c63-e5f2-4367-a7f7-8134a65f2dd7" />
+  </li>
 </ul>
 
 <hr/>
@@ -192,4 +208,4 @@ This project showcases:
   <li>Cloud-native security and reliability practices</li>
 </ul>
 
-<p><strong>Ideal for DevOps / Cloud Engineer roles.</strong></p>
+<p><strong>Ideal for Platform / Cloud Engineer roles.</strong></p>
